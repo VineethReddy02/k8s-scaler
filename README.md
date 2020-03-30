@@ -1,4 +1,4 @@
-# k8s- scaler
+# k8s-scaler
 
 This project is a kubernetes resource scaler. The main objective of this project is to create 10's/100's/100's of kubernetes resources with ease. Infact by just using a single command.
 
