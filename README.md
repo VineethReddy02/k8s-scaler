@@ -121,6 +121,17 @@ If **KUBECONFIG** env variable is not set. k8s-scaler tries to find ```InCluster
 **Note:**
 Deletion of resources can be performed same as above provided example for pods/daemonsets.
 
+#### To list namespaces, deployments, pods, daemonsets
+
+```yaml
+vineeth@vineeth-Latitude-7490 /bin  $ ./k8s-scaler list
+NAMESPACE         DEPLOYMENTS     PODS        DAEMONSETS  
+aqua              3               13          1           
+default           0               0           0           
+kube-node-lease   0               0           0           
+kube-public       0               0           0           
+kube-system       1               28          6 
+```
 #### TODO:
 
 1. Support custom resources creation at scale. As CRD already exists in cluster. CR creation can be done using k8s-scaler by passing ```--kind``` value but custom resources spec formation needs to be taken care in k8s-scaler.
