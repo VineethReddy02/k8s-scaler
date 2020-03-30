@@ -4,20 +4,27 @@ import (
 	"go.uber.org/zap"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"sync"
 )
 
 func (ctx *KubeClient) CreateNamespaces(count int32) {
+	var syncer sync.WaitGroup
+	syncer.Add(int(count))
 	namespaceClient := ctx.Client.CoreV1().Namespaces()
 	created := 0
 	for counter := 0; counter < int(count); counter++ {
 		created++
-		namespace := generateNamespaceSpec(int32(counter))
-		_, err := namespaceClient.Create(namespace)
-		if err != nil {
-			created--
-			ctx.Logger.Error("Failed to create namespace ", zap.String("name", namespace.Name), zap.Error(err))
-		}
+		go func() {
+			defer syncer.Done()
+			namespace := generateNamespaceSpec(int32(counter))
+			_, err := namespaceClient.Create(namespace)
+			if err != nil {
+				created--
+				ctx.Logger.Error("Failed to create namespace ", zap.String("name", namespace.Name), zap.Error(err))
+			}
+		}()
 	}
+	syncer.Wait()
 	ctx.Logger.Info("Successfully created", zap.Int("Namespaces", created))
 }
 
@@ -34,6 +41,8 @@ func generateNamespaceSpec(counter int32) *corev1.Namespace {
 }
 
 func (ctx *KubeClient) DeleteNamespaces(count int32, excludeNamspaces []string) {
+	var syncer sync.WaitGroup
+	syncer.Add(int(count))
 	namespaceClient := ctx.Client.CoreV1().Namespaces()
 	namespaces := ctx.namespacesForDeletion(excludeNamspaces)
 	var deleted int
@@ -42,11 +51,16 @@ func (ctx *KubeClient) DeleteNamespaces(count int32, excludeNamspaces []string) 
 	}
 	for counter := 0; counter < int(count); counter++ {
 		deleted++
-		err := namespaceClient.Delete(namespaces[counter], &metav1.DeleteOptions{})
-		if err != nil {
-			deleted--
-			ctx.Logger.Error("Failed to delete namespace ", zap.String("name", namespaces[counter]), zap.Error(err))
-		}
+		name := namespaces[counter]
+		go func() {
+			defer syncer.Done()
+			err := namespaceClient.Delete(name, &metav1.DeleteOptions{})
+			if err != nil {
+				deleted--
+				ctx.Logger.Error("Failed to delete namespace ", zap.String("name", name), zap.Error(err))
+			}
+		}()
 	}
+	syncer.Wait()
 	ctx.Logger.Info("Successfully created", zap.Int("Namespaces", deleted))
 }

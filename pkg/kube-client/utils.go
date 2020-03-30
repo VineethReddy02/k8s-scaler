@@ -18,8 +18,9 @@ const (
 )
 
 var images = []string{"nginx:latest", "vineeth0297/languages:1.0", "tomcat:latest", "httpd:latest"}
-var seededRand *rand.Rand = rand.New(
-	rand.NewSource(time.Now().UnixNano()))
+var seededRand = rand.New(
+	rand.NewSource(time.Now().Unix()))
+var random int
 
 func randStringBytes() string {
 	b := make([]byte, stringSize)
@@ -41,6 +42,7 @@ func generateImage() string {
 }
 
 func (ctx *KubeClient) generateNamespace(excludeNamespaces []string) string {
+	random++
 	// This loop makes sure no creation/deletion on resources from kube-system namespace.
 	var namespaces []string
 	for {
@@ -55,7 +57,7 @@ func (ctx *KubeClient) generateNamespace(excludeNamespaces []string) string {
 		} else {
 			namespaces = ctx.namespacesForDeletion(excludeNamespaces)
 		}
-		n := seededRand.Int() % len(namespaces)
+		n := seededRand.Intn(len(namespaces))
 		namespace := namespaces[n]
 		if namespace != "kube-system" && namespace != "kube-node-lease" && namespace != "kube-public" {
 			return namespace

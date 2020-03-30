@@ -2,6 +2,7 @@ package kube_client
 
 import (
 	"fmt"
+	"sync"
 
 	"go.uber.org/zap"
 	appsv1 "k8s.io/api/apps/v1"
@@ -11,22 +12,26 @@ import (
 
 func (ctx *KubeClient) CreateDeployments(count, replicas int32, namespace string, excludeNamespaces []string) {
 	var created int
+	var syncer sync.WaitGroup
+	syncer.Add(int(count))
 	for counter := 0; counter < int(count); counter++ {
 		created++
 		if namespace == "" {
 			namespace = ctx.generateNamespace(excludeNamespaces)
 		}
-		if namespace == "" {
-			panic("Couldn't find the namespace for resource creation.")
-		}
+
 		deploymentsClient := ctx.Client.AppsV1().Deployments(namespace)
-		deployment := generateDeploymentSpec(int32(counter), replicas)
-		_, err := deploymentsClient.Create(deployment)
-		if err != nil {
-			created--
-			ctx.Logger.Error("Failed to create deployment ", zap.String("name", deployment.Name), zap.Error(err))
-		}
+		go func() {
+			defer syncer.Done()
+			deployment := generateDeploymentSpec(int32(counter), replicas)
+			_, err := deploymentsClient.Create(deployment)
+			if err != nil {
+				created--
+				ctx.Logger.Error("Failed to create deployment ", zap.String("name", deployment.Name), zap.Error(err))
+			}
+		}()
 	}
+	syncer.Wait()
 	ctx.Logger.Info("Successfully created", zap.Int("Deployments", created))
 }
 
@@ -65,42 +70,65 @@ func generateDeploymentSpec(counter, replicas int32) *appsv1.Deployment {
 func (ctx *KubeClient) DeleteDeployments(count int32, providedNamespace string, excludeNamespaces []string) {
 	var counter int
 	var calcNamespace []string
-	if providedNamespace == "" {
-		calcNamespace = ctx.namespacesForDeletion(excludeNamespaces)
-	}
-
+	var syncer sync.WaitGroup
+	syncer.Add(int(count))
 	deploymentClient := ctx.Client.AppsV1().Deployments(providedNamespace)
 	deploymentList, err := deploymentClient.List(metav1.ListOptions{})
 	if err != nil {
 		ctx.Logger.Error("Unable to list deployments", zap.Error(err))
 	}
 
-	for _, namespace := range calcNamespace {
-		if providedNamespace != "" {
-			if len(deploymentList.Items) < int(count) {
-				panic("The number of deployments in the provided namespaces are lesser than the the provided scale to delete")
-			}
-		} else {
-			deploymentClient = ctx.Client.AppsV1().Deployments(namespace)
-			deploymentList, err = deploymentClient.List(metav1.ListOptions{})
+	if providedNamespace != "" {
+		if len(deploymentList.Items) < int(count) {
+			panic("The number of deployments in the provided namespaces are lesser than the the provided scale to delete")
 		}
-
-		if deploymentList != nil && len(deploymentList.Items) > 0 {
-			for b, _ := range deploymentList.Items {
-				err = deploymentClient.Delete(deploymentList.Items[b].Name, &metav1.DeleteOptions{})
-				counter++
+		for _, d := range deploymentList.Items {
+			counter++
+			// This is to make sure goroutines get the actual name.
+			name := d.Name
+			go func() {
+				defer syncer.Done()
+				err = ctx.Client.AppsV1().Deployments(providedNamespace).Delete(name, &metav1.DeleteOptions{})
 				if err != nil {
 					counter--
-					ctx.Logger.Error("Failed to delete deployments ", zap.String("name", deploymentList.Items[b].Name), zap.Error(err))
+					ctx.Logger.Error("Failed to delete deployments ", zap.String("name", name), zap.Error(err))
 				}
-				if counter == int(count) {
-					break
+			}()
+			if counter == int(count) {
+				break
+			}
+		}
+	} else {
+		calcNamespace = ctx.namespacesForDeletion(excludeNamespaces)
+		for _, namespace := range calcNamespace {
+			deploymentClient = ctx.Client.AppsV1().Deployments(namespace)
+			deploymentList, err = deploymentClient.List(metav1.ListOptions{})
+			if deploymentList != nil && len(deploymentList.Items) > 0 {
+				for _, d := range deploymentList.Items {
+					// This is to make sure goroutines get the actual name.
+					name := d.Name
+					counter++
+					go func() {
+						defer syncer.Done()
+						err = deploymentClient.Delete(name, &metav1.DeleteOptions{})
+						if err != nil {
+							counter--
+							ctx.Logger.Error("Failed to delete deployments ", zap.String("name", name), zap.Error(err))
+						}
+					}()
+					if counter == int(count) {
+						break
+					}
 				}
 			}
-		} else {
-			counter--
+			if counter == int(count) {
+				break
+			}
+		}
+		if counter != int(count) {
+			ctx.Logger.Error("Unable to delete the deployments. As provided scale of deployments doesn't exits across the namespaces.", zap.Int("Deleted", counter))
 		}
 	}
-
+	syncer.Wait()
 	ctx.Logger.Info("Successfully deleted ", zap.Int("deployments", counter))
 }

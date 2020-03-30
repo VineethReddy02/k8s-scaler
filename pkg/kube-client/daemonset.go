@@ -5,26 +5,31 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"sync"
 )
 
 func (ctx *KubeClient) CreateDaemonsets(count int32, namespace string, excludeNamespaces []string) {
 	var created int
+	var syncer sync.WaitGroup
+	syncer.Add(int(count))
 	for i := 0; i < int(count); i++ {
 		created++
 		if namespace == "" {
 			namespace = ctx.generateNamespace(excludeNamespaces)
 		}
-		if namespace == "" {
-			panic("Couldn't find the namespace for resource creation.")
-		}
+
 		daemonsetClient := ctx.Client.AppsV1().DaemonSets(namespace)
-		daemonset := generateDaemonsetSpec()
-		_, err := daemonsetClient.Create(daemonset)
-		if err != nil {
-			created--
-			ctx.Logger.Error("Failed to create daemonsets ", zap.String("name", daemonset.Name), zap.Error(err))
-		}
+		go func() {
+			defer syncer.Done()
+			daemonset := generateDaemonsetSpec()
+			_, err := daemonsetClient.Create(daemonset)
+			if err != nil {
+				created--
+				ctx.Logger.Error("Failed to create daemonsets ", zap.String("name", daemonset.Name), zap.Error(err))
+			}
+		}()
 	}
+	syncer.Wait()
 	ctx.Logger.Info("Successfully created ", zap.Int("daemonsets", created))
 }
 
@@ -65,9 +70,8 @@ func generateDaemonsetSpec() *appsv1.DaemonSet {
 func (ctx *KubeClient) DeleteDaemonsets(count int32, providedNamespace string, excludeNamespaces []string) {
 	var counter int
 	var calcNamespace []string
-	if providedNamespace == "" {
-		calcNamespace = ctx.namespacesForDeletion(excludeNamespaces)
-	}
+	var syncer sync.WaitGroup
+	syncer.Add(int(count))
 
 	daemonsetClient := ctx.Client.AppsV1().DaemonSets(providedNamespace)
 	daemonsetList, err := daemonsetClient.List(metav1.ListOptions{})
@@ -75,32 +79,57 @@ func (ctx *KubeClient) DeleteDaemonsets(count int32, providedNamespace string, e
 		ctx.Logger.Error("Unable to list daemonsets", zap.Error(err))
 	}
 
-	for _, namespace := range calcNamespace {
-		if providedNamespace != "" {
-			if len(daemonsetList.Items) < int(count) {
-				panic("The number of daemonsets in the provided namespaces are lesser than the the provided scale to delete")
-			}
-		} else {
-			daemonsetClient = ctx.Client.AppsV1().DaemonSets(namespace)
-			daemonsetList, err = daemonsetClient.List(metav1.ListOptions{})
+	if providedNamespace != "" {
+		if len(daemonsetList.Items) < int(count) {
+			panic("The number of daemonsets in the provided namespaces are lesser than the the provided scale to delete")
 		}
-
-		if daemonsetList != nil && len(daemonsetList.Items) > 0 {
-			for b, _ := range daemonsetList.Items {
-				err = daemonsetClient.Delete(daemonsetList.Items[b].Name, &metav1.DeleteOptions{})
+		for _, d := range daemonsetList.Items {
+			// This is to make sure goroutines get the actual name.
+			name := d.Name
+			go func() {
+				defer syncer.Done()
+				err = daemonsetClient.Delete(name, &metav1.DeleteOptions{})
 				counter++
 				if err != nil {
 					counter--
-					ctx.Logger.Error("Failed to delete daemonsets ", zap.String("name", daemonsetList.Items[b].Name), zap.Error(err))
+					ctx.Logger.Error("Failed to delete daemonsets ", zap.String("name", name), zap.Error(err))
 				}
-				if counter == int(count) {
-					break
+			}()
+			if counter == int(count) {
+				break
+			}
+		}
+	} else {
+		calcNamespace = ctx.namespacesForDeletion(excludeNamespaces)
+		for _, namespace := range calcNamespace {
+			daemonsetClient = ctx.Client.AppsV1().DaemonSets(namespace)
+			daemonsetList, err = daemonsetClient.List(metav1.ListOptions{})
+			if daemonsetList != nil && len(daemonsetList.Items) > 0 {
+				for _, d := range daemonsetList.Items {
+					counter++
+					// This is to make sure goroutines get the actual name.
+					name := d.Name
+					go func() {
+						defer syncer.Done()
+						err = daemonsetClient.Delete(name, &metav1.DeleteOptions{})
+						if err != nil {
+							counter--
+							ctx.Logger.Error("Failed to delete daemonsets ", zap.String("name", name), zap.Error(err))
+						}
+					}()
+					if counter == int(count) {
+						break
+					}
 				}
 			}
-		} else {
-			counter--
+			if counter == int(count) {
+				break
+			}
+		}
+		if counter != int(count) {
+			ctx.Logger.Error("Unable to delete the daemonsets. As provided scale of daemonsets doesn't exits across the namespaces.", zap.Int("Deleted", counter))
 		}
 	}
-
+	syncer.Wait()
 	ctx.Logger.Info("Successfully deleted ", zap.Int("daemonsets", counter))
 }

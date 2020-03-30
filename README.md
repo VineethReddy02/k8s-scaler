@@ -40,31 +40,31 @@ If ```--kubeconfig``` flag is not provided. k8s-scaler tries to read **KUBECONFI
 
 If **KUBECONFIG** env variable is not set. k8s-scaler tries to find ```InClusterConfig``` using k8s **client-go** library.
 
-#### To create deployments across multiple namespaces.
+#### To create deployments in a random namespace
 
 ```yaml
 ./k8s-scaler create deployments --scale 250 --replicas 25 
 ```
 
-#### To create deployments across multiple namespaces but exclude couple of namespaces.
+#### To create deployments in a random namespace but exclude couple of namespaces
 
 ```yaml
 ./k8s-scaler create deployments --scale 250 --replicas 25 --exclude-namespaces namespace01,namespace02
 ```
 
-#### To create deployments in a specific namespace.
+#### To create deployments in a specific namespace
 
 ```yaml
 ./k8s-scaler create deployments --scale 250 --replicas 25 --namespace namepsace01
 ```
 
-#### To create daemonsets across multiple namespaces
+#### To create daemonsets in a random namespace
 
 ```yaml
 ./k8s-scaler create daemonsets --scale 50 
 ```
 
-#### To create daemonsets across multiple namespaces but to exclude couple of namespaces
+#### To create daemonsets in a random namespace but to exclude couple of namespaces
 
 ```yaml
 ./k8s-scaler create daemonsets --scale 50 --exclude-namespaces namespace01,namespace02
@@ -76,13 +76,13 @@ If **KUBECONFIG** env variable is not set. k8s-scaler tries to find ```InCluster
 ./k8s-scaler create daemonsets --scale 50 --namespace namespace01
 ```
 
-#### To create pods across multiple namespaces
+#### To create pods in a random namespace
 
 ```yaml
 ./k8s-scaler create pods --scale 500  
 ```
 
-#### To create pods across multiple namespaces but exclude couple of namespaces
+#### To create pods in a random namespace but exclude couple of namespaces
 
 ```yaml
 ./k8s-scaler create pods --scale 50 --exclude-namespaces namespace01,namespace02
