@@ -1,14 +1,15 @@
 package kube_client
 
 import (
+	"sync"
+
 	"go.uber.org/zap"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"sync"
 )
 
-func (ctx *KubeClient) CreateDaemonsets(count int32, namespace string, excludeNamespaces []string) {
+func (ctx *KubeClient) CreateDaemonsets(count, containers int32, namespace string, excludeNamespaces []string) {
 	var created int
 	var syncer sync.WaitGroup
 	syncer.Add(int(count))
@@ -21,7 +22,7 @@ func (ctx *KubeClient) CreateDaemonsets(count int32, namespace string, excludeNa
 		daemonsetClient := ctx.Client.AppsV1().DaemonSets(namespace)
 		go func() {
 			defer syncer.Done()
-			daemonset := generateDaemonsetSpec()
+			daemonset := generateDaemonsetSpec(containers)
 			_, err := daemonsetClient.Create(daemonset)
 			if err != nil {
 				created--
@@ -33,11 +34,9 @@ func (ctx *KubeClient) CreateDaemonsets(count int32, namespace string, excludeNa
 	ctx.Logger.Info("Successfully created ", zap.Int("daemonsets", created))
 }
 
-func generateDaemonsetSpec() *appsv1.DaemonSet {
+func generateDaemonsetSpec(containers int32) *appsv1.DaemonSet {
 	name := generateName()
-	image := generateImage()
 	labels := generateLabels(daemonsetName, name)
-	containerName := name
 	pod := &appsv1.DaemonSet{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:   name,
@@ -53,12 +52,7 @@ func generateDaemonsetSpec() *appsv1.DaemonSet {
 					Labels: labels,
 				},
 				Spec: corev1.PodSpec{
-					Containers: []corev1.Container{
-						{
-							Name:  containerName,
-							Image: image,
-						},
-					},
+					Containers: generateContainers(containers, name),
 				},
 			},
 		},

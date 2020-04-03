@@ -1,7 +1,6 @@
 package kube_client
 
 import (
-	"fmt"
 	"sync"
 
 	"go.uber.org/zap"
@@ -10,7 +9,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-func (ctx *KubeClient) CreateDeployments(count, replicas int32, namespace string, excludeNamespaces []string) {
+func (ctx *KubeClient) CreateDeployments(count, replicas, containers int32, namespace string, excludeNamespaces []string) {
 	var created int
 	var syncer sync.WaitGroup
 	syncer.Add(int(count))
@@ -23,7 +22,7 @@ func (ctx *KubeClient) CreateDeployments(count, replicas int32, namespace string
 		deploymentsClient := ctx.Client.AppsV1().Deployments(namespace)
 		go func() {
 			defer syncer.Done()
-			deployment := generateDeploymentSpec(int32(counter), replicas)
+			deployment := generateDeploymentSpec(containers, replicas)
 			_, err := deploymentsClient.Create(deployment)
 			if err != nil {
 				created--
@@ -35,11 +34,9 @@ func (ctx *KubeClient) CreateDeployments(count, replicas int32, namespace string
 	ctx.Logger.Info("Successfully created", zap.Int("Deployments", created))
 }
 
-func generateDeploymentSpec(counter, replicas int32) *appsv1.Deployment {
+func generateDeploymentSpec(containers, replicas int32) *appsv1.Deployment {
 	name := generateName()
-	image := generateImage()
 	labels := generateLabels(deploymentName, name)
-	containerName := name + fmt.Sprint(counter)
 	deployment := &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: name,
@@ -54,11 +51,7 @@ func generateDeploymentSpec(counter, replicas int32) *appsv1.Deployment {
 					Labels: labels,
 				},
 				Spec: corev1.PodSpec{
-					Containers: []corev1.Container{{
-						Image: image,
-						Name:  containerName,
-						Args:  []string{},
-					}},
+					Containers: generateContainers(containers, name),
 				},
 			},
 		},

@@ -37,6 +37,7 @@ to quickly create a Cobra application.`,
 		resourceType := args[0]
 		count, _ := cmd.Flags().GetInt32("scale")
 		replicas, _ := cmd.Flags().GetInt32("replicas")
+		containers, _ := cmd.Flags().GetInt32("containers")
 		config, _ := rootCmd.PersistentFlags().GetString("kubeconfig")
 		namespace, _ := cmd.Flags().GetString("namespace")
 		namespaces, _ := cmd.Flags().GetString("exclude-namespaces")
@@ -45,13 +46,17 @@ to quickly create a Cobra application.`,
 		clientInfo := kubeClient.GetKubeClient(config)
 		kubeClient.Client = clientInfo
 		if resourceType == "deployments" {
-			kubeClient.CreateDeployments(count, replicas, namespace, excludeNamespaces)
+			kubeClient.CreateDeployments(count, replicas, containers, namespace, excludeNamespaces)
 		} else if resourceType == "pods" {
-			kubeClient.CreatePods(count, namespace, excludeNamespaces)
+			kubeClient.CreatePods(count, containers, namespace, excludeNamespaces)
 		} else if resourceType == "daemonsets" {
-			kubeClient.CreateDaemonsets(count, namespace, excludeNamespaces)
+			kubeClient.CreateDaemonsets(count, containers, namespace, excludeNamespaces)
 		} else if resourceType == "namespaces" {
 			kubeClient.CreateNamespaces(count)
+		} else if resourceType == "statefulsets" {
+			kubeClient.CreateStatefulsets(count, containers, replicas, namespace, excludeNamespaces)
+		} else if resourceType == "jobs" {
+			kubeClient.CreateJobs(count, containers, namespace, excludeNamespaces)
 		} else {
 			panic("Invalid resource with create cmd")
 		}
@@ -61,28 +66,40 @@ to quickly create a Cobra application.`,
 # If not provided k8s-scaler reads the KUBECONFIG environment variable
 # If KUBECONFIG env is not set tries find InClusterConfig using k8s client-go
 
-# To create deployments randomly across different namespaces
-./k8s-scaler create deployments --scale 10 --replicas 3
+# To create deployments in a random namespace
+./k8s-scaler create deployments --scale 10 --replicas 3 --containers 15 --containers 15
 
 # To create deployments in a specific namespace
-./k8s-scaler create deployments --scale 10 --replicas 3 --namespace k8s-scaler
+./k8s-scaler create deployments --scale 10 --replicas 3 --containers 15 --namespace k8s-scaler
 
 # To create deployments and exclude some specific namespaces for deployment creation
-./k8s-scaler create deployments --scale 10 --replicas 3 --exclude-namespaces namespace01,namespace02
+./k8s-scaler create deployments --scale 10 --replicas 3 --containers 15 --exclude-namespaces namespace01,namespace02
 
-# To create deployments randomly across different namespaces and load provided KUBECONFIG
-./k8s-scaler create deployments --scale 10 --replicas 3 --kubeconfig /home/vineeth/gke.yaml
+# To create deployments in a random namespace and load provided KUBECONFIG
+./k8s-scaler create deployments --scale 10 --replicas 3 --containers 15 --kubeconfig /home/vineeth/gke.yaml
 
 Note: The above provided examples are also applicable for pods.
 
 # To create namespaces
 ./k8s-scaler create namespaces --scale 10
 
-# To create daemonsets across multiple namespaces.
-./k8s-scaler create daemonsets --scale 10
+# To create daemonsets in a random namespace.
+./k8s-scaler create daemonsets --scale 10 --containers 15
 
-# To create daemonsets across multiple namespaces but exclude couple of namespaces.
-./k8s-scaler create daemonsets --scale 10 --exclude-namespaces namespace01,namespace02
+# To create daemonsets in a random namespace but exclude couple of namespaces.
+./k8s-scaler create daemonsets --scale 10 --containers 15 --exclude-namespaces namespace01,namespace02
+
+# To create statefulsets in a random namespace.
+./k8s-scaler create statefulsets --scale 10 --containers 15
+
+# To create statefulsets in a random namespace but exclude couple of namespaces.
+./k8s-scaler create statefulsets --scale 10 --containers 15 --exclude-namespaces namespace01,namespace02
+
+# To create jobs in a random namespace namespaces.
+./k8s-scaler create jobs --scale 10 --containers 15
+
+# To create jobs in a random namespace but exclude couple of namespaces.
+./k8s-scaler create jobs --scale 10 --containers 15 --exclude-namespaces namespace01,namespace02
 
 `,
 }
@@ -92,6 +109,7 @@ func init() {
 
 	createCmd.Flags().Int32P("scale", "s", 1, "number of instances.")
 	createCmd.Flags().Int32P("replicas", "r", 1, "number of replicas per instance.")
+	createCmd.Flags().Int32P("containers", "c", 1, "number of containers per pod.")
 	createCmd.Flags().StringP("namespace", "n", "", "specify the namespace")
 	createCmd.Flags().StringP("exclude-namespaces", "e", "", "specify namespaces that needs to be excluded during creation.")
 }

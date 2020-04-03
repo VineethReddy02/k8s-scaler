@@ -1,7 +1,6 @@
 package kube_client
 
 import (
-	"fmt"
 	"sync"
 
 	"go.uber.org/zap"
@@ -9,7 +8,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-func (ctx *KubeClient) CreatePods(count int32, namespace string, excludeNamespaces []string) {
+func (ctx *KubeClient) CreatePods(count, containers int32, namespace string, excludeNamespaces []string) {
 	var created int
 	var syncer sync.WaitGroup
 	syncer.Add(int(count))
@@ -21,7 +20,7 @@ func (ctx *KubeClient) CreatePods(count int32, namespace string, excludeNamespac
 		podClient := ctx.Client.CoreV1().Pods(namespace)
 		go func() {
 			defer syncer.Done()
-			pod := generatePodSpec(int32(counter))
+			pod := generatePodSpec(containers)
 			_, err := podClient.Create(pod)
 			if err != nil {
 				created--
@@ -33,23 +32,16 @@ func (ctx *KubeClient) CreatePods(count int32, namespace string, excludeNamespac
 	ctx.Logger.Info("Successfully created", zap.Int("Pods", created))
 }
 
-func generatePodSpec(counter int32) *corev1.Pod {
+func generatePodSpec(containers int32) *corev1.Pod {
 	name := generateName()
-	image := generateImage()
 	labels := generateLabels(podName, name)
-	containerName := name + fmt.Sprint(counter)
 	pod := &corev1.Pod{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:   name,
 			Labels: labels,
 		},
 		Spec: corev1.PodSpec{
-			Containers: []corev1.Container{
-				{
-					Name:  containerName,
-					Image: image,
-				},
-			},
+			Containers: generateContainers(containers, name),
 		},
 	}
 	return pod

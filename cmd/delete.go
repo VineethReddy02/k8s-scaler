@@ -50,6 +50,10 @@ to quickly create a Cobra application.`,
 			kubeClient.DeleteDaemonsets(count, namespace, excludeNamespaces)
 		} else if resourceType == "namespaces" {
 			kubeClient.DeleteNamespaces(count, excludeNamespaces)
+		} else if resourceType == "statefulsets" {
+			kubeClient.DeleteStatefulSets(count, namespace, excludeNamespaces)
+		} else if resourceType == "jobs" {
+			kubeClient.DeleteJobs(count, namespace, excludeNamespaces)
 		} else {
 			panic("Invalid resource with delete cmd")
 		}
@@ -59,16 +63,16 @@ to quickly create a Cobra application.`,
 # If not provided k8s-scaler reads the KUBECONFIG environment variable
 # If KUBECONFIG env is not set tries find InClusterConfig using k8s client-go
 
-# To delete deployments randomly across different namespaces
+# To delete deployments in a random namespace
 ./k8s-scaler delete deployments --scale 10 --replicas 3
 
 # To delete deployments in a specific namespace
 ./k8s-scaler delete deployments --scale 10 --replicas 3 --namespace k8s-scaler
 
-# To delete deployments and exclude some specific namespaces for deployment creation
+# To delete deployments and exclude some specific namespaces for deployment deletion
 ./k8s-scaler delete deployments --scale 10 --replicas 3 --exclude-namespaces namespace01,namespace02
 
-# To delete deployments randomly across different namespaces and load provided KUBECONFIG
+# To delete deployments in a random namespace and load provided KUBECONFIG
 ./k8s-scaler delete deployments --scale 10 --replicas 3 --kubeconfig /home/vineeth/gke.yaml
 
 Note: The above provided examples are also applicable for pods.
@@ -76,13 +80,23 @@ Note: The above provided examples are also applicable for pods.
 # To delete namespaces
 ./k8s-scaler delete namespaces --scale 10
 
-# To delete daemonsets across multiple namespaces.
-./k8s-scaler delete --scale 5 daemonsets
+# To delete daemonsets in a random namespace.
+./k8s-scaler delete daemonsets --scale 5 
 
-# To delete daemonsets across multiple namespaces but exclude couple of namespaces.
+# To delete daemonsets in a random namespace but exclude couple of namespaces.
 ./k8s-scaler delete daemonsets --scale 5 --exclude-namespaces namespace01,namespace02
 
+# To delete statefulsets in a random namespace namespaces.
+./k8s-scaler delete statefulsets --scale 5
 
+# To delete statefulsets in a random namespace but exclude couple of namespaces.
+./k8s-scaler delete statefulsets --scale 5 --exclude-namespaces namespace01,namespace02
+
+# To delete jobs in a random namespace namespace.
+./k8s-scaler delete jobs --scale 5 daemonsets
+
+# To delete jobs in a random namespace but exclude couple of namespaces.
+./k8s-scaler delete jobs --scale 5 --exclude-namespaces namespace01,namespace02
 `,
 }
 

@@ -1,6 +1,8 @@
 package kube_client
 
 import (
+	"fmt"
+	corev1 "k8s.io/api/core/v1"
 	"math/rand"
 	"time"
 
@@ -9,15 +11,17 @@ import (
 )
 
 const (
-	daemonsetName  = "daemonset"
-	deploymentName = "deployment"
-	podName        = "pod"
-	namespaceName  = "namespace"
-	letterBytes    = "abcdefghijklmnopqrstuvwxyz"
-	stringSize     = 9
+	daemonsetName   = "daemonset"
+	deploymentName  = "deployment"
+	statefulsetName = "statefulset"
+	jobName         = "job"
+	podName         = "pod"
+	namespaceName   = "namespace"
+	letterBytes     = "abcdefghijklmnopqrstuvwxyz"
+	stringSize      = 9
 )
 
-var images = []string{"nginx:latest", "vineeth0297/languages:1.0", "tomcat:latest", "httpd:latest"}
+var images = []string{"nginx:latest", "vineeth0297/languages:1.0", "tomcat:latest", "httpd:latest", "postgres:latest", "cassandra:latest"}
 var seededRand = rand.New(
 	rand.NewSource(time.Now().Unix()))
 var random int
@@ -90,6 +94,20 @@ func (ctx *KubeClient) namespacesForDeletion(excludeNamespaces []string) []strin
 		}
 	}
 	return result
+}
+
+func generateContainers(count int32, name string) (containers []corev1.Container) {
+	for i := 0; i < int(count); i++ {
+		containerName := name + fmt.Sprint(i)
+		image := generateImage()
+		container := corev1.Container{
+			Name:  containerName,
+			Image: image,
+			Args:  []string{"sleep", "50000"},
+		}
+		containers = append(containers, container)
+	}
+	return containers
 }
 
 func generateLabels(resourceType, name string) map[string]string {

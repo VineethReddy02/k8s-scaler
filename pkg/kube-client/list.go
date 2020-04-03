@@ -13,12 +13,12 @@ func (ctx *KubeClient) ListResources() {
 	if err != nil {
 		panic("Unable to list the namespaces")
 	}
-	template := "%-18s%-16s%-12s%-12s\n"
-	fmt.Printf(template, "NAMESPACE", "DEPLOYMENTS", "PODS", "DAEMONSETS")
+	template := "%-18s%-16s%-16s%-16s%-12s%-12s\n"
+	fmt.Printf(template, "NAMESPACE", "DAEMONSETS", "DEPLOYMENTS", "STATEFULSETS", "PODS", "JOBS")
 	var syncer sync.WaitGroup
 	for _, namespace := range namespaces.Items {
-		syncer.Add(3)
-		var numberOfPods, numberOfDeployments, numberOfDaemonsets int
+		syncer.Add(5)
+		var numberOfPods, numberOfDeployments, numberOfDaemonsets, numberOfStatefulsets, numberOfJobs int
 		go func() {
 			defer syncer.Done()
 			pods, err := ctx.Client.CoreV1().Pods(namespace.Name).List(metav1.ListOptions{})
@@ -46,7 +46,25 @@ func (ctx *KubeClient) ListResources() {
 			numberOfDaemonsets = len(daemonsets.Items)
 		}()
 
+		go func() {
+			defer syncer.Done()
+			statefulsets, err := ctx.Client.AppsV1().StatefulSets(namespace.Name).List(metav1.ListOptions{})
+			if err != nil {
+				panic("Unable to list the daemomsets")
+			}
+			numberOfStatefulsets = len(statefulsets.Items)
+		}()
+
+		go func() {
+			defer syncer.Done()
+			jobs, err := ctx.Client.BatchV1().Jobs(namespace.Name).List(metav1.ListOptions{})
+			if err != nil {
+				panic("Unable to list the daemomsets")
+			}
+			numberOfJobs = len(jobs.Items)
+		}()
+
 		syncer.Wait()
-		fmt.Printf(template, namespace.Name, strconv.Itoa(numberOfDeployments), strconv.Itoa(numberOfPods), strconv.Itoa(numberOfDaemonsets))
+		fmt.Printf(template, namespace.Name, strconv.Itoa(numberOfDeployments), strconv.Itoa(numberOfDaemonsets), strconv.Itoa(numberOfStatefulsets), strconv.Itoa(numberOfPods), strconv.Itoa(numberOfJobs))
 	}
 }

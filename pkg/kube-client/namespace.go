@@ -1,10 +1,11 @@
 package kube_client
 
 import (
+	"sync"
+
 	"go.uber.org/zap"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"sync"
 )
 
 func (ctx *KubeClient) CreateNamespaces(count int32) {
@@ -16,7 +17,7 @@ func (ctx *KubeClient) CreateNamespaces(count int32) {
 		created++
 		go func() {
 			defer syncer.Done()
-			namespace := generateNamespaceSpec(int32(counter))
+			namespace := generateNamespaceSpec()
 			_, err := namespaceClient.Create(namespace)
 			if err != nil {
 				created--
@@ -28,7 +29,7 @@ func (ctx *KubeClient) CreateNamespaces(count int32) {
 	ctx.Logger.Info("Successfully created", zap.Int("Namespaces", created))
 }
 
-func generateNamespaceSpec(counter int32) *corev1.Namespace {
+func generateNamespaceSpec() *corev1.Namespace {
 	name := generateName()
 	labels := generateLabels(namespaceName, name)
 	namespace := &corev1.Namespace{
