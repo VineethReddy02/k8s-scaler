@@ -160,8 +160,9 @@ Deletion of resources can be performed same as above provided example for pods/d
 #### To list namespaces, deployments, pods, daemonsets
 
 ```yaml
+vineeth@vineeth-Latitude-7490 /bin (master) $ ./k8s-scaler list
 NAMESPACE         DAEMONSETS      DEPLOYMENTS     STATEFULSETS    PODS        JOBS        
-aqua              5               0               0               10          0           
+test              5               0               0               10          0           
 default           0               0               0               0           0           
 kube-node-lease   0               0               0               0           0           
 kube-public       0               0               0               0           0           
