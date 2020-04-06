@@ -45,7 +45,7 @@ func generateJobSpec(containers int32) *v1.Job {
 		Spec: v1.JobSpec{
 			Template: corev1.PodTemplateSpec{
 				Spec: corev1.PodSpec{
-					Containers:    generateContainers(containers, name),
+					Containers:    generateContainersForJobs(containers, name),
 					RestartPolicy: "Never",
 				},
 			},

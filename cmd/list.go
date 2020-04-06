@@ -24,12 +24,8 @@ import (
 var listCmd = &cobra.Command{
 	Use:   "list",
 	Short: "To list namespaces, deployments, pods, daemonsets.",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Long: `List will list the number of pods, deployments, daemonsets, jobs, cronjobs, statefulsets per namespace
+across different namespaces`,
 	Run: func(cmd *cobra.Command, args []string) {
 		config, _ := rootCmd.PersistentFlags().GetString("kubeconfig")
 		kubeClient := kube_client.NewKubeClient()

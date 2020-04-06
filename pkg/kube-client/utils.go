@@ -110,6 +110,20 @@ func generateContainers(count int32, name string) (containers []corev1.Container
 	return containers
 }
 
+func generateContainersForJobs(count int32, name string) (containers []corev1.Container) {
+	for i := 0; i < int(count); i++ {
+		containerName := name + fmt.Sprint(i)
+		image := generateImage()
+		container := corev1.Container{
+			Name:  containerName,
+			Image: image,
+			Args:  []string{"sleep", "1m"},
+		}
+		containers = append(containers, container)
+	}
+	return containers
+}
+
 func generateLabels(resourceType, name string) map[string]string {
 	return map[string]string{resourceType: name}
 }

@@ -27,12 +27,11 @@ import (
 var createCmd = &cobra.Command{
 	Use:   "create",
 	Short: "To create deployments/daemonsets/pods/namespaces",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Long: `To create deployments, daemonsets, statefulsets, jobs, cronjobs, pods and you also configure
+number of instances using --scale per resource also, replicas if resource can manage replicas and number 
+of containers are also configurable. Resources can be created in the desired namespaces and desired namespaces
+can also be excluded if creation is performed on a random namespace without specifying the namespace.
+`,
 	Run: func(cmd *cobra.Command, args []string) {
 		resourceType := args[0]
 		count, _ := cmd.Flags().GetInt32("scale")
@@ -57,6 +56,8 @@ to quickly create a Cobra application.`,
 			kubeClient.CreateStatefulsets(count, containers, replicas, namespace, excludeNamespaces)
 		} else if resourceType == "jobs" {
 			kubeClient.CreateJobs(count, containers, namespace, excludeNamespaces)
+		} else if resourceType == "cronjobs" {
+			kubeClient.CreateCronJobs(count, containers, namespace, excludeNamespaces)
 		} else {
 			panic("Invalid resource with create cmd")
 		}
@@ -95,11 +96,21 @@ Note: The above provided examples are also applicable for pods.
 # To create statefulsets in a random namespace but exclude couple of namespaces.
 ./k8s-scaler create statefulsets --scale 10 --containers 15 --exclude-namespaces namespace01,namespace02
 
+Note: All the jobs created are by default configured to sleep for 1 minute and move to completed state.
+
 # To create jobs in a random namespace namespaces.
 ./k8s-scaler create jobs --scale 10 --containers 15
 
 # To create jobs in a random namespace but exclude couple of namespaces.
 ./k8s-scaler create jobs --scale 10 --containers 15 --exclude-namespaces namespace01,namespace02
+
+Note: All the cron jobs created are by default configured to sleep for 1 minute and to run for every 30 minutes.
+
+# To create cronjobs in a random namespace namespaces.
+./k8s-scaler create cronjobs --scale 10 --containers 15
+
+# To create cronjobs in a random namespace but exclude couple of namespaces.
+./k8s-scaler create cronjobs --scale 10 --containers 15 --exclude-namespaces namespace01,namespace02
 
 `,
 }

@@ -16,10 +16,10 @@ Usage:
   k8s-scaler [command]
 
 Available Commands:
-  create      To create deployments/daemonsets/pods/namespaces
-  delete      To delete deployments/daemonsets/pods/namespaces
+  create      To create deployments/daemonsets/pods/namespaces/statefulsets/jobs/cronjobs
+  delete      To delete deployments/daemonsets/pods/namespaces/statefulsets/jobs/cronjobs
   help        Help about any command
-  list        To list namespaces, deployments, pods, daemonsets.
+  list        To list namespaces, deployments, pods, daemonsets, statefulsets, jobs, cronjobs.
 
 Flags:
   -h, --help                help for k8s-scaler
@@ -112,6 +112,8 @@ If **KUBECONFIG** env variable is not set. k8s-scaler tries to find ```InCluster
 ./k8s-scaler create statefulsets --scale 500 --replicas 3 --containers 10 --namespace namespace01 
 ```
 
+**Note:** All the jobs created are by default configured to sleep for 1 minute and move to completed state.
+
 #### To create jobs in a random namespace
 
 ```yaml
@@ -128,6 +130,26 @@ If **KUBECONFIG** env variable is not set. k8s-scaler tries to find ```InCluster
 
 ```yaml
 ./k8s-scaler create jobs --scale 500 --namespace namespace01 --containers 10
+```
+
+**Note:** All the cron jobs created are by default configured to sleep for 1 minute and to run for every 30 minutes.
+
+#### To create cron jobs in a random namespace
+
+```yaml
+./k8s-scaler create cronjobs --scale 500 --containers 10
+```
+
+#### To create cron jobs in a random namespace but exclude couple of namespaces
+
+```yaml
+./k8s-scaler create cronjobs --scale 500 --containers 10 --exclude-namespaces namespace01,namespace02
+```
+
+#### To create cron jobs in specific namespace
+
+```yaml
+./k8s-scaler create cronjobs --scale 500 --namespace namespace01 --containers 10
 ```
 
 #### To create namespaces
@@ -155,19 +177,19 @@ If **KUBECONFIG** env variable is not set. k8s-scaler tries to find ```InCluster
 ```
 
 **Note:**
-Deletion of resources can be performed same as above provided example for pods/daemonsets/statefulsets/jobs.
+Deletion of resources can be performed same as above provided example for pods/daemonsets/statefulsets/jobs/cronjobs.
 
-#### To list namespaces, deployments, pods, daemonsets
+#### To list namespaces, deployments, pods, daemonsets, statefulsets, jobs, cronjobs
 
 ```yaml
-vineeth@vineeth-Latitude-7490 /bin (master) $ ./k8s-scaler list
-NAMESPACE         DAEMONSETS      DEPLOYMENTS     STATEFULSETS    PODS        JOBS        
-test              5               0               0               10          0           
-default           0               0               0               0           0           
-kube-node-lease   0               0               0               0           0           
-kube-public       0               0               0               0           0           
-kube-system       9               4               0               31          0           
-monitoring        1               0               3               10          4   
+vineeth@vineeth-Latitude-7490 /bin (master) $ ./k8s-scaler list    
+NAMESPACE         DAEMONSETS      DEPLOYMENTS     STATEFULSETS    PODS        JOBS        CRONJOBS    
+test              3               0               0               3           0           0           
+default           100             50              4               300         2           2           
+kube-node-lease   0               0               0               0           0           0           
+kube-public       0               0               0               0           0           0           
+kube-system       8               4               0               15          0           0   
+scale             200             1000            30              2500        10          5
 ```
 #### TODO:
 

@@ -26,12 +26,10 @@ import (
 var deleteCmd = &cobra.Command{
 	Use:   "delete",
 	Short: "To delete deployments/daemonsets/pods/namespaces",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Long: `To delete deployments, daemonsets, statefulsets, jobs, cronjobs, pods and you also configure
+number of instances using --scale per resource. Resources can be deleted in the desired namespaces and 
+desired namespaces can also be excluded from deletion with deletion is performed on random namespace
+without specifying the namespace.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		resourceType := args[0]
 		count, _ := cmd.Flags().GetInt32("scale")
@@ -97,6 +95,12 @@ Note: The above provided examples are also applicable for pods.
 
 # To delete jobs in a random namespace but exclude couple of namespaces.
 ./k8s-scaler delete jobs --scale 5 --exclude-namespaces namespace01,namespace02
+
+# To delete cronjobs in a random namespace namespace.
+./k8s-scaler delete cronjobs --scale 5 daemonsets
+
+# To delete cronjobs in a random namespace but exclude couple of namespaces.
+./k8s-scaler delete cronjobs --scale 5 --exclude-namespaces namespace01,namespace02
 `,
 }
 
