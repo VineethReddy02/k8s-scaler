@@ -42,6 +42,8 @@ func generatePodSpec(containers int32) *corev1.Pod {
 		},
 		Spec: corev1.PodSpec{
 			Containers: generateContainers(containers, name),
+			Tolerations: Config.Tolerations,
+			NodeSelector:  Config.NodeSelector,
 		},
 	}
 	return pod

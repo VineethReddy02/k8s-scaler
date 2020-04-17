@@ -24,7 +24,7 @@ import (
 var listCmd = &cobra.Command{
 	Use:   "list",
 	Short: "To list namespaces, deployments, pods, daemonsets.",
-	Long: `List will list the number of pods, deployments, daemonsets, jobs, cronjobs, statefulsets per namespace
+	Long: `List will list the number of pods, deployments, daemonsets, jobs, cronjobs, statefulsets, replicationcontrollers, replicasets per namespace
 across different namespaces`,
 	Run: func(cmd *cobra.Command, args []string) {
 		config, _ := rootCmd.PersistentFlags().GetString("kubeconfig")
@@ -38,7 +38,7 @@ across different namespaces`,
 # If not provided k8s-scaler reads the KUBECONFIG environment variable
 # If KUBECONFIG env is not set tries find InClusterConfig using k8s client-go
 
-# To list namespaces, deployments, pods, daemonsets
+# To list namespaces, deployments, pods, daemonsets, jobs, cronjobs, replicationcontrollers, replicasets
 ./k8s-scaler list
 `,
 }

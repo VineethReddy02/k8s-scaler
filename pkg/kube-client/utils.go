@@ -11,15 +11,24 @@ import (
 )
 
 const (
-	daemonsetName   = "daemonset"
-	deploymentName  = "deployment"
-	statefulsetName = "statefulset"
-	jobName         = "job"
-	podName         = "pod"
-	namespaceName   = "namespace"
-	letterBytes     = "abcdefghijklmnopqrstuvwxyz"
-	stringSize      = 9
+	daemonsetName             = "daemonset"
+	deploymentName            = "deployment"
+	statefulsetName           = "statefulset"
+	replicationcontrollerName = "replicationcontroller"
+	replicasetName            = "replicaset"
+	jobName                   = "job"
+	podName                   = "pod"
+	namespaceName             = "namespace"
+	letterBytes               = "abcdefghijklmnopqrstuvwxyz"
+	stringSize                = 9
 )
+
+type GlobalConfig struct {
+	NodeSelector map[string]string
+	Tolerations  []corev1.Toleration
+}
+
+var Config GlobalConfig
 
 var images = []string{"nginx:latest", "vineeth0297/languages:1.0", "tomcat:latest", "httpd:latest", "postgres:latest", "cassandra:latest"}
 var seededRand = rand.New(

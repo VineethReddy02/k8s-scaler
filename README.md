@@ -44,6 +44,8 @@ If **KUBECONFIG** env variable is not set. k8s-scaler tries to find ```InCluster
 
 ```yaml
 ./k8s-scaler create deployments --scale 250 --replicas 25 --containers 10
+(or)
+./k8s-scaler create d --scale 250 --replicas 25 --containers 10
 ```
 
 #### To create deployments in a random namespace but exclude couple of namespaces
@@ -52,16 +54,18 @@ If **KUBECONFIG** env variable is not set. k8s-scaler tries to find ```InCluster
 ./k8s-scaler create deployments --scale 250 --replicas 25 --containers 10 --exclude-namespaces namespace01,namespace02
 ```
 
-#### To create deployments in a specific namespace
+#### To create deployments in a specific namespace and to schedule resources on desired node
 
 ```yaml
-./k8s-scaler create deployments --scale 250 --replicas 25 --containers 10 --namespace namepsace01
+./k8s-scaler create deployments --scale 250 --replicas 25 --containers 10 --namespace namepsace01 --node-selector kubernetes.io/hostname=mock-kubelet --toleration k8s-pods-simulator.io/provider=mock
 ```
 
 #### To create daemonsets in a random namespace
 
 ```yaml
 ./k8s-scaler create daemonsets --scale 50 --containers 10
+(or)
+./k8s-scaler create ds --scale 50 --containers 10
 ```
 
 #### To create daemonsets in a random namespace but to exclude couple of namespaces
@@ -70,16 +74,18 @@ If **KUBECONFIG** env variable is not set. k8s-scaler tries to find ```InCluster
 ./k8s-scaler create daemonsets --scale 50 --containers 10 --exclude-namespaces namespace01,namespace02
 ```
 
-#### To create daemonsets in specific namespace
+#### To create daemonsets in specific namespace and to schedule resources on desired node
 
 ```yaml
-./k8s-scaler create daemonsets --scale 50 --containers 10 --namespace namespace01
+./k8s-scaler create daemonsets --scale 50 --containers 10 --namespace namespace01 --node-selector kubernetes.io/hostname=mock-kubelet --toleration k8s-pods-simulator.io/provider=mock
 ```
 
 #### To create pods in a random namespace
 
 ```yaml
 ./k8s-scaler create pods --scale 500  --containers 10
+(or)
+./k8s-scaler create p --scale 500  --containers 10
 ```
 
 #### To create pods in a random namespace but exclude couple of namespaces
@@ -88,16 +94,18 @@ If **KUBECONFIG** env variable is not set. k8s-scaler tries to find ```InCluster
 ./k8s-scaler create pods --scale 50 --containers 10 --exclude-namespaces namespace01,namespace02
 ```
 
-#### To create pods in specific namespace
+#### To create pods in specific namespace and to schedule resources on desired node
 
 ```yaml
-./k8s-scaler create pods --scale 50 --containers 10 --namespace namespace01 
+./k8s-scaler create pods --scale 50 --containers 10 --namespace namespace01 --node-selector kubernetes.io/hostname=mock-kubelet --toleration k8s-pods-simulator.io/provider=mock
 ```
 
 #### To create statefulsets in a random namespace
 
 ```yaml
 ./k8s-scaler create statefulsets --scale 500 --replicas 3 --containers 10
+(or)
+./k8s-scaler create s --scale 500 --replicas 3 --containers 10
 ```
 
 #### To create statefulsets in a random namespace but exclude couple of namespaces
@@ -106,10 +114,10 @@ If **KUBECONFIG** env variable is not set. k8s-scaler tries to find ```InCluster
 ./k8s-scaler create statefulsets --scale 500 --replicas 3 --containers 10 --exclude-namespaces namespace01,namespace02
 ```
 
-#### To create statefulsets in specific namespace
+#### To create statefulsets in specific namespace and to schedule resources on desired node
 
 ```yaml
-./k8s-scaler create statefulsets --scale 500 --replicas 3 --containers 10 --namespace namespace01 
+./k8s-scaler create statefulsets --scale 500 --replicas 3 --containers 10 --namespace namespace01 --node-selector kubernetes.io/hostname=mock-kubelet --toleration k8s-pods-simulator.io/provider=mock
 ```
 
 **Note:** All the jobs created are by default configured to sleep for 1 minute and move to completed state.
@@ -118,6 +126,8 @@ If **KUBECONFIG** env variable is not set. k8s-scaler tries to find ```InCluster
 
 ```yaml
 ./k8s-scaler create jobs --scale 500 --containers 10
+(or)
+./k8s-scaler create j --scale 500 --containers 10
 ```
 
 #### To create jobs in a random namespace but exclude couple of namespaces
@@ -126,10 +136,10 @@ If **KUBECONFIG** env variable is not set. k8s-scaler tries to find ```InCluster
 ./k8s-scaler create jobs --scale 500 --containers 10 --exclude-namespaces namespace01,namespace02
 ```
 
-#### To create jobs in specific namespace
+#### To create jobs in specific namespace and to schedule resources on desired node
 
 ```yaml
-./k8s-scaler create jobs --scale 500 --namespace namespace01 --containers 10
+./k8s-scaler create jobs --scale 500 --namespace namespace01 --containers 10 --node-selector kubernetes.io/hostname=mock-kubelet --toleration k8s-pods-simulator.io/provider=mock
 ```
 
 **Note:** All the cron jobs created are by default configured to sleep for 1 minute and to run for every 30 minutes.
@@ -138,6 +148,8 @@ If **KUBECONFIG** env variable is not set. k8s-scaler tries to find ```InCluster
 
 ```yaml
 ./k8s-scaler create cronjobs --scale 500 --containers 10
+(or)
+./k8s-scaler create cj --scale 500 --containers 10
 ```
 
 #### To create cron jobs in a random namespace but exclude couple of namespaces
@@ -146,10 +158,38 @@ If **KUBECONFIG** env variable is not set. k8s-scaler tries to find ```InCluster
 ./k8s-scaler create cronjobs --scale 500 --containers 10 --exclude-namespaces namespace01,namespace02
 ```
 
-#### To create cron jobs in specific namespace
+#### To create cron jobs in specific namespace and to schedule resources on desired node
 
 ```yaml
-./k8s-scaler create cronjobs --scale 500 --namespace namespace01 --containers 10
+./k8s-scaler create cronjobs --scale 500 --namespace namespace01 --containers 10 --node-selector kubernetes.io/hostname=mock-kubelet --toleration k8s-pods-simulator.io/provider=mock
+```
+
+#### To create replicationcontrollers in a random namespace.
+```
+./k8s-scaler create replicationcontrollers --scale 10 --replicas 5 --containers 15
+(or)
+./k8s-scaler create rc --scale 10 --replicas 5 --containers 15
+```
+
+#### To create replicationcontrollers in a random namespace but exclude couple of namespaces.
+```
+./k8s-scaler create replicationcontrollers --scale 10 --replicas 5 --containers 15 --exclude-namespaces namespace01,namespace02
+(or)
+./k8s-scaler create rc --scale 10 --replicas 5 --containers 15 --exclude-namespaces namespace01,namespace02
+```
+
+#### To create replicasets in a random namespace.
+```
+./k8s-scaler create replicasets --scale 10 --replicas 5 --containers 15 
+(or)
+./k8s-scaler create rs --scale 10 --replicas 5 --containers 15
+```
+
+#### To create replicasets in a random namespace but exclude couple of namespaces.
+```
+./k8s-scaler create replicasets --scale 10 --replicas 5 --containers 15 --exclude-namespaces namespace01,namespace02
+(or)
+./k8s-scaler create rs --scale 10 --replicas 5 --containers 15 --exclude-namespaces namespace01,namespace02
 ```
 
 #### To create namespaces
@@ -174,22 +214,24 @@ If **KUBECONFIG** env variable is not set. k8s-scaler tries to find ```InCluster
 
 ```yaml
 ./k8s-scaler delete deployments --scale 500 --namespace namespace01
+(or)
+./k8s-scaler delete d --scale 500 --namespace namespace01
 ```
 
 **Note:**
-Deletion of resources can be performed same as above provided example for pods/daemonsets/statefulsets/jobs/cronjobs.
+Deletion of resources can be performed same as above provided example for pods/daemonsets/statefulsets/replicationcontrollers/replicasets/jobs/cronjobs.
+
+You also add pass node-selector & toleration while resource creation to schedule the workloads on the desired node. For now, we only accept one pair of node-selector and toleration. Also, toleration operator is by default set to "Equal" and effect is set to "NoSchedule" key & value from toleration is configurable using flag.   
 
 #### To list namespaces, deployments, pods, daemonsets, statefulsets, jobs, cronjobs
 
 ```yaml
-vineeth@vineeth-Latitude-7490 /bin (master) $ ./k8s-scaler list    
-NAMESPACE         DAEMONSETS      DEPLOYMENTS     STATEFULSETS    PODS        JOBS        CRONJOBS    
-test              3               0               0               3           0           0           
-default           100             50              4               300         2           2           
-kube-node-lease   0               0               0               0           0           0           
-kube-public       0               0               0               0           0           0           
-kube-system       8               4               0               15          0           0   
-scale             200             1000            30              2500        10          5
+vineeth@vineeth-Latitude-7490 /bin (master) $ ./k8s-scaler list
+NAMESPACE         DEPLOYMENTS     REPLICASETS     DAEMONSETS      STATEFULSETS    PODS        JOBS        CRONJOBS    REPLICATION-CONTROLLERS
+test              3000            3000            1000            500             7486        30          10          30               
+default           1300            1300            456             250             5642        10          5           5                            
+kube-system       8               11              4               0               15          0           0           0               
+mock-kubelet      3500            4000            1200            400             9348        50          30          35     
 ```
 #### TODO:
 

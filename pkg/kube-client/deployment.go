@@ -52,6 +52,8 @@ func generateDeploymentSpec(containers, replicas int32) *appsv1.Deployment {
 				},
 				Spec: corev1.PodSpec{
 					Containers: generateContainers(containers, name),
+					Tolerations: Config.Tolerations,
+					NodeSelector:  Config.NodeSelector,
 				},
 			},
 		},

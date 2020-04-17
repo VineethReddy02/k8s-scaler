@@ -49,7 +49,9 @@ func generateCronJobSpec(containers int32) *v1beta1.CronJob {
 				Spec: v1.JobSpec{
 					Template: corev1.PodTemplateSpec{
 						Spec: corev1.PodSpec{
-							Containers:    generateContainersForJobs(containers, name),
+							Containers: generateContainersForJobs(containers, name),
+							Tolerations: Config.Tolerations,
+							NodeSelector:  Config.NodeSelector,
 							RestartPolicy: "Never",
 						},
 					},

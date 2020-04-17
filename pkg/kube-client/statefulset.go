@@ -53,6 +53,8 @@ func generateStatefulSetSpec(containers, replicas int32) *appsv1.StatefulSet {
 				},
 				Spec: corev1.PodSpec{
 					Containers: generateContainers(containers, name),
+					Tolerations: Config.Tolerations,
+					NodeSelector:  Config.NodeSelector,
 				},
 			},
 		},

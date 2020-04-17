@@ -40,19 +40,25 @@ without specifying the namespace.`,
 		kubeClient := kube_client.NewKubeClient()
 		clientInfo := kubeClient.GetKubeClient(config)
 		kubeClient.Client = clientInfo
-		if resourceType == "deployments" {
+		if resourceType == "deployments" || resourceType == "d" {
 			kubeClient.DeleteDeployments(count, namespace, excludeNamespaces)
-		} else if resourceType == "pods" {
+		} else if resourceType == "pods" || resourceType == "p" {
 			kubeClient.DeletePods(count, namespace, excludeNamespaces)
-		} else if resourceType == "daemonsets" {
+		} else if resourceType == "daemonsets" || resourceType == "ds" {
 			kubeClient.DeleteDaemonsets(count, namespace, excludeNamespaces)
-		} else if resourceType == "namespaces" {
+		} else if resourceType == "namespaces" || resourceType == "n" {
 			kubeClient.DeleteNamespaces(count, excludeNamespaces)
-		} else if resourceType == "statefulsets" {
+		} else if resourceType == "statefulsets" || resourceType == "s" {
 			kubeClient.DeleteStatefulSets(count, namespace, excludeNamespaces)
-		} else if resourceType == "jobs" {
+		} else if resourceType == "jobs" || resourceType == "j" {
 			kubeClient.DeleteJobs(count, namespace, excludeNamespaces)
-		} else {
+		} else if resourceType == "cronjobs" || resourceType == "cj" {
+			kubeClient.DeleteCronJobs(count, namespace, excludeNamespaces)
+		}else if resourceType == "replicationcontrollers" || resourceType == "rc" {
+			kubeClient.DeleteReplicationControllers(count, namespace, excludeNamespaces)
+		}else if resourceType == "replicasets" || resourceType == "rs" {
+			kubeClient.DeleteReplicaSets(count, namespace, excludeNamespaces)
+		}else {
 			panic("Invalid resource with delete cmd")
 		}
 	},

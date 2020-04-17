@@ -53,6 +53,8 @@ func generateDaemonsetSpec(containers int32) *appsv1.DaemonSet {
 				},
 				Spec: corev1.PodSpec{
 					Containers: generateContainers(containers, name),
+					Tolerations: Config.Tolerations,
+					NodeSelector:  Config.NodeSelector,
 				},
 			},
 		},
