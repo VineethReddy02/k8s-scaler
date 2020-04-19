@@ -20,7 +20,7 @@ const (
 	podName                   = "pod"
 	namespaceName             = "namespace"
 	letterBytes               = "abcdefghijklmnopqrstuvwxyz"
-	stringSize                = 9
+	stringSize                = 12
 )
 
 type GlobalConfig struct {

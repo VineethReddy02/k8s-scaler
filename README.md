@@ -57,7 +57,7 @@ If **KUBECONFIG** env variable is not set. k8s-scaler tries to find ```InCluster
 #### To create deployments in a specific namespace and to schedule resources on desired node
 
 ```yaml
-./k8s-scaler create deployments --scale 250 --replicas 25 --containers 10 --namespace namepsace01 --node-selector kubernetes.io/hostname=mock-kubelet --toleration k8s-pods-simulator.io/provider=mock
+./k8s-scaler create deployments --scale 250 --replicas 25 --containers 10 --namespace namepsace01 --node-selector kubernetes.io/hostname=mock-kubelet --toleration mocklet.io/provider=mock
 ```
 
 #### To create daemonsets in a random namespace
@@ -77,7 +77,7 @@ If **KUBECONFIG** env variable is not set. k8s-scaler tries to find ```InCluster
 #### To create daemonsets in specific namespace and to schedule resources on desired node
 
 ```yaml
-./k8s-scaler create daemonsets --scale 50 --containers 10 --namespace namespace01 --node-selector kubernetes.io/hostname=mock-kubelet --toleration k8s-pods-simulator.io/provider=mock
+./k8s-scaler create daemonsets --scale 50 --containers 10 --namespace namespace01 --node-selector kubernetes.io/hostname=mock-kubelet --toleration mocklet.io/provider=mock
 ```
 
 #### To create pods in a random namespace
@@ -97,7 +97,7 @@ If **KUBECONFIG** env variable is not set. k8s-scaler tries to find ```InCluster
 #### To create pods in specific namespace and to schedule resources on desired node
 
 ```yaml
-./k8s-scaler create pods --scale 50 --containers 10 --namespace namespace01 --node-selector kubernetes.io/hostname=mock-kubelet --toleration k8s-pods-simulator.io/provider=mock
+./k8s-scaler create pods --scale 50 --containers 10 --namespace namespace01 --node-selector kubernetes.io/hostname=mock-kubelet --toleration mocklet.io/provider=mock
 ```
 
 #### To create statefulsets in a random namespace
@@ -117,7 +117,7 @@ If **KUBECONFIG** env variable is not set. k8s-scaler tries to find ```InCluster
 #### To create statefulsets in specific namespace and to schedule resources on desired node
 
 ```yaml
-./k8s-scaler create statefulsets --scale 500 --replicas 3 --containers 10 --namespace namespace01 --node-selector kubernetes.io/hostname=mock-kubelet --toleration k8s-pods-simulator.io/provider=mock
+./k8s-scaler create statefulsets --scale 500 --replicas 3 --containers 10 --namespace namespace01 --node-selector kubernetes.io/hostname=mock-kubelet --toleration mocklet.io/provider=mock
 ```
 
 **Note:** All the jobs created are by default configured to sleep for 1 minute and move to completed state.
@@ -139,7 +139,7 @@ If **KUBECONFIG** env variable is not set. k8s-scaler tries to find ```InCluster
 #### To create jobs in specific namespace and to schedule resources on desired node
 
 ```yaml
-./k8s-scaler create jobs --scale 500 --namespace namespace01 --containers 10 --node-selector kubernetes.io/hostname=mock-kubelet --toleration k8s-pods-simulator.io/provider=mock
+./k8s-scaler create jobs --scale 500 --namespace namespace01 --containers 10 --node-selector kubernetes.io/hostname=mock-kubelet --toleration mocklet.io/provider=mock
 ```
 
 **Note:** All the cron jobs created are by default configured to sleep for 1 minute and to run for every 30 minutes.
@@ -161,7 +161,7 @@ If **KUBECONFIG** env variable is not set. k8s-scaler tries to find ```InCluster
 #### To create cron jobs in specific namespace and to schedule resources on desired node
 
 ```yaml
-./k8s-scaler create cronjobs --scale 500 --namespace namespace01 --containers 10 --node-selector kubernetes.io/hostname=mock-kubelet --toleration k8s-pods-simulator.io/provider=mock
+./k8s-scaler create cronjobs --scale 500 --namespace namespace01 --containers 10 --node-selector kubernetes.io/hostname=mock-kubelet --toleration mocklet.io/provider=mock
 ```
 
 #### To create replicationcontrollers in a random namespace.
