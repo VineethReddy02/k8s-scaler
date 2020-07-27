@@ -233,6 +233,16 @@ default           1300            1300            456             250           
 kube-system       8               11              4               0               15          0           0           0               
 mock-kubelet      3500            4000            1200            400             9348        50          30          35     
 ```
+
+
+#### To create & delete periodically the deployments with provided time interval (i.e in seconds)
+
+The below cmd would create & delete 100 deployments with replicas as 50 for every 10 seconds in scale namespace.
+ 
+```
+./k8s-scaler chaos d --scale 100 -r 50 --time 10 -n scale
+```
+
 #### TODO:
 
 1. Support custom resources creation at scale. As CRD already exists in cluster. CR creation can be done using k8s-scaler by passing ```--kind``` value but custom resources spec formation needs to be taken care in k8s-scaler.
