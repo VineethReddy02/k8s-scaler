@@ -6,6 +6,10 @@ This project is a kubernetes resource scaler. The main objective of this project
 
 Clone this repository, you can find ```k8s-scaler``` executable under ```bin``` directory. Running ```./build.sh``` generates latest **k8s-scaler** executable.
 
+or 
+
+Download the k8s-scaler binary from [github releases](https://github.com/VineethReddy02/k8s-scaler/releases/tag/0.1v)
+
 ```yaml
 vineeth@vineeth-Latitude-7490 /bin  $ ./k8s-scaler --help
 
